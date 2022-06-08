@@ -10,3 +10,8 @@ password*.txt
 
 # 結果のファイル
 result.txt
+
+# Batch files
+*.bat
+!init.bat
+!run.bat
