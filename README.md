@@ -31,10 +31,29 @@
 ## 使い方
 
 1. Teamsからダウンロードした主席者ファイルをダウンロードする．これは，会議を立ち上げたアカウントからのみ可能である．
-2. `run.bat`をクリックする．
+2. `run.bat`をクリック or `.env\Scripts\python src\main.py`を実行する．
 3. ファイルを選択するダイアログが表示されるため，Teamsからダウンロードした主席者ファイルを選択する．
 
 もし，出力に文字化けが発生する場合は，同じ内容が`check-teams-attendee/result.txt`にも保存されるため，これを確認すればよい．
+
+### オプション
+
+名簿のファイル名を指定して実行する場合
+  ```powershell
+  python src/main.py 名簿.xlsx
+  ```
+
+パスワードなしで実行する
+  ```
+  python src/main.py --no-password
+  ```
+
+パスワードを指定して実行する
+  ```
+  python src/main.py --password my_password
+  ```
+
+なお，`run.bat`と`init.bat`を除くバッチファイル（`*.bat`）はGitに記録されないため，`研究会出欠確認.bat`などを作成することで場合分けができる．
 
 ## 再インストール方法
 
