@@ -13,7 +13,9 @@ class CheckTeamsAttendee:
         """初期化する
         """
         self.PROJ_DIRNAME = Path(__file__).resolve().parents[1]
-        self.EXCEL_FILENAME = self.PROJ_DIRNAME / "研究会用名簿_20211014.xlsx"
+
+        # ファイル名のデフォルト
+        self.EXCEL_FILENAME = self.PROJ_DIRNAME / "名簿.xlsx"
         self.PASSWD_FILENAME = self.PROJ_DIRNAME / "password.txt"
         self.RESULT_FILENAME = self.PROJ_DIRNAME / "result.txt"
 
@@ -27,12 +29,28 @@ class CheckTeamsAttendee:
         """
         # Debug modeを判定する
         parser = argparse.ArgumentParser(
-            description="Run program with debug mode."
+            description=(
+                "Check Microsoft Teams meetings attendees "
+                "using name list file"
+            )
         )
         parser.add_argument(
-            "--debug", help="Debug mode", action="store_true",
+            "namelist_filename",
+            help=f"The name list filename. Default: {self.EXCEL_FILENAME}.",
+            default=self.EXCEL_FILENAME, type=Path, nargs="?",
+        )
+        parser.add_argument(
+            "--no-password",
+            help="The name list file is not locked",
+            action="store_true",
+        )
+        parser.add_argument(
+            "--debug", help="Run program with debug mode",
+            action="store_true",
         )
         args = parser.parse_args()
+        self.EXCEL_FILENAME = args.namelist_filename
+        HAS_NOT_PASSWORD = args.no_password
         IS_DEBUG_MODE = args.debug
 
         # 名簿とパスワードファイルの存在を確認する
@@ -63,7 +81,7 @@ class CheckTeamsAttendee:
         attendees_list = self.get_attendees_list_from_csv(
             meeting_attendance_list_csv
         )
-        self.read_excel(attendees_list)
+        self.read_excel(attendees_list, HAS_NOT_PASSWORD)
 
     def get_attendees_list_from_csv(self, meeting_attendance_list_csv: Path):
         """出席者リストをCSVファイルから取得する
@@ -87,15 +105,19 @@ class CheckTeamsAttendee:
                 attendees_list.append(temp_attendee_name)
         return attendees_list
 
-    def read_excel(self, attendees_list: list[str]):
+    def read_excel(self, attendees_list: list[str], has_not_password: bool):
         """名簿のエクセルファイルを読む
 
         Args:
             attendees_list (list[str]): 出席者リスト
+            has_not_password (bool): パスワードを持っていない名簿
         """
         # Get password from password file
-        with self.PASSWD_FILENAME.open(encoding="utf-8") as passwd_f:
-            passwd = passwd_f.read().strip()
+        if has_not_password is True:
+            passwd = None
+        else:
+            with self.PASSWD_FILENAME.open(encoding="utf-8") as passwd_f:
+                passwd = passwd_f.read().strip()
 
         # Excelファイルと出席者リストを比較し，未確認者の氏名とメールアドレスを取得する
         absentees_list = []
